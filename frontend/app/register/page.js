@@ -19,7 +19,7 @@ export default function RegisterPage() {
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/auth/register",
+        "https://ai-study-assistant-cxti.onrender.com/auth/register",
         {
           method: "POST",
           headers: {
@@ -53,7 +53,9 @@ export default function RegisterPage() {
 
       router.push("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.message || "حدث خطأ أثناء إنشاء الحساب"
+      );
     } finally {
       setLoading(false);
     }
