@@ -1,6 +1,6 @@
-import json
 import os
-import re
+
+import chromadb
 
 
 BASE_DIR = os.path.dirname(
@@ -9,40 +9,13 @@ BASE_DIR = os.path.dirname(
     )
 )
 
-STORE_PATH = os.path.join(
+CHROMA_PATH = os.path.join(
     BASE_DIR,
-    "rag_store.json",
+    "chroma_db",
 )
 
-
-def load_store():
-    if not os.path.exists(STORE_PATH):
-        return []
-
-    try:
-        with open(
-            STORE_PATH,
-            "r",
-            encoding="utf-8",
-        ) as file:
-            return json.load(file)
-
-    except Exception:
-        return []
-
-
-def save_store(data):
-    with open(
-        STORE_PATH,
-        "w",
-        encoding="utf-8",
-    ) as file:
-        json.dump(
-            data,
-            file,
-            ensure_ascii=False,
-            indent=2,
-        )
+client = chromadb.PersistentClient(path=CHROMA_PATH)
+collection = client.get_or_create_collection(name="topic_files")
 
 
 def split_text(
@@ -67,128 +40,61 @@ def split_text(
     return chunks
 
 
-def normalize_words(text: str):
-    text = text.lower()
-
-    words = re.findall(
-        r"[\w\u0600-\u06FF]+",
-        text,
-    )
-
-    return set(words)
-
-
 def add_document(
     topic_id: int,
     file_id: int,
     filename: str,
     text: str,
-):
+) -> None:
+    collection.delete(where={"file_id": file_id})
+
     chunks = split_text(text)
 
     if not chunks:
         return
 
-    store = load_store()
-
-    store = [
-        item
-        for item in store
-        if item.get("file_id") != file_id
-    ]
-
-    for index, chunk in enumerate(chunks):
-        store.append(
+    collection.add(
+        ids=[
+            f"{file_id}_{index}"
+            for index in range(len(chunks))
+        ],
+        documents=chunks,
+        metadatas=[
             {
                 "topic_id": topic_id,
                 "file_id": file_id,
                 "filename": filename,
-                "chunk_index": index,
-                "text": chunk,
             }
-        )
-
-    save_store(store)
+            for _ in chunks
+        ],
+    )
 
 
 def search_topic(
     topic_id: int,
     question: str,
     limit: int = 4,
-):
-    store = load_store()
-
-    topic_chunks = [
-        item
-        for item in store
-        if item.get("topic_id") == topic_id
-    ]
-
-    if not topic_chunks:
+) -> list[str]:
+    if limit <= 0:
         return []
 
-    question_words = normalize_words(
-        question
+    results = collection.query(
+        query_texts=[question],
+        n_results=limit,
+        where={"topic_id": topic_id},
     )
 
-    scored_chunks = []
+    documents = results.get("documents")
+    if not documents or not documents[0]:
+        return []
 
-    for item in topic_chunks:
-        chunk_text = item.get(
-            "text",
-            "",
-        )
-
-        chunk_words = normalize_words(
-            chunk_text
-        )
-
-        common_words = (
-            question_words
-            & chunk_words
-        )
-
-        score = len(common_words)
-
-        scored_chunks.append(
-            (
-                score,
-                chunk_text,
-            )
-        )
-
-    scored_chunks.sort(
-        key=lambda item: item[0],
-        reverse=True,
-    )
-
-    results = [
-        text
-        for score, text in scored_chunks
-        if score > 0
-    ]
-
-    if not results:
-        results = [
-            item.get("text", "")
-            for item in topic_chunks[:limit]
-        ]
-
-    return results[:limit]
+    return documents[0]
 
 
 def delete_file_chunks(
     file_id: int,
-):
-    store = load_store()
-
-    store = [
-        item
-        for item in store
-        if item.get("file_id") != file_id
-    ]
-
-    save_store(store)
+) -> None:
+    collection.delete(where={"file_id": file_id})
 
 
 def build_grounded_prompt(

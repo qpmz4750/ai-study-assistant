@@ -1,4 +1,5 @@
 fastapi
+chromadb
 google-genai
 passlib[bcrypt]
 PyJWT
@@ -6,3 +7,4 @@ pypdf
 python-dotenv
 python-multipart
 uvicorn[standard]
+bcrypt==4.0.1

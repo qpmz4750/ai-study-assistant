@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const API_URL = "https://ai-study-assistant-cxti.onrender.com/auth/login";
+const API_URL = "http://127.0.0.1:8000";
 
 export default function DashboardPage() {
   const router = useRouter();
