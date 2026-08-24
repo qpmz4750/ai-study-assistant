@@ -1,0 +1,42 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+
+# Runtime data
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+.env
+backend/.env
+frontend/node_modules/
+frontend/.next/
+backend/__pycache__/
+backend/app/__pycache__/
+backend/chroma_db/
+backend/app.db
+app.db
+*.log
