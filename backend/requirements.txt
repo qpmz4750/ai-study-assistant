@@ -7,3 +7,5 @@ python-dotenv
 python-multipart
 uvicorn[standard]
 
+chromadb
+sentence-transformers
