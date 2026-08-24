@@ -1,25 +1,48 @@
+import json
 import os
-
-import chromadb
-from sentence_transformers import SentenceTransformer
+import re
 
 
-CHROMA_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
-    "chroma_db",
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(__file__)
+    )
 )
 
-client = chromadb.PersistentClient(
-    path=CHROMA_PATH
+STORE_PATH = os.path.join(
+    BASE_DIR,
+    "rag_store.json",
 )
 
-collection = client.get_or_create_collection(
-    name="study_files"
-)
 
-embedding_model = SentenceTransformer(
-    "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-)
+def load_store():
+    if not os.path.exists(STORE_PATH):
+        return []
+
+    try:
+        with open(
+            STORE_PATH,
+            "r",
+            encoding="utf-8",
+        ) as file:
+            return json.load(file)
+
+    except Exception:
+        return []
+
+
+def save_store(data):
+    with open(
+        STORE_PATH,
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            data,
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 def split_text(
@@ -44,6 +67,17 @@ def split_text(
     return chunks
 
 
+def normalize_words(text: str):
+    text = text.lower()
+
+    words = re.findall(
+        r"[\w\u0600-\u06FF]+",
+        text,
+    )
+
+    return set(words)
+
+
 def add_document(
     topic_id: int,
     file_id: int,
@@ -55,31 +89,26 @@ def add_document(
     if not chunks:
         return
 
-    embeddings = embedding_model.encode(
-        chunks
-    ).tolist()
+    store = load_store()
 
-    ids = [
-        f"topic_{topic_id}_file_{file_id}_chunk_{i}"
-        for i in range(len(chunks))
+    store = [
+        item
+        for item in store
+        if item.get("file_id") != file_id
     ]
 
-    metadatas = [
-        {
-            "topic_id": topic_id,
-            "file_id": file_id,
-            "filename": filename,
-            "chunk_index": i,
-        }
-        for i in range(len(chunks))
-    ]
+    for index, chunk in enumerate(chunks):
+        store.append(
+            {
+                "topic_id": topic_id,
+                "file_id": file_id,
+                "filename": filename,
+                "chunk_index": index,
+                "text": chunk,
+            }
+        )
 
-    collection.upsert(
-        ids=ids,
-        documents=chunks,
-        embeddings=embeddings,
-        metadatas=metadatas,
-    )
+    save_store(store)
 
 
 def search_topic(
@@ -87,40 +116,79 @@ def search_topic(
     question: str,
     limit: int = 4,
 ):
-    question_embedding = embedding_model.encode(
-        [question]
-    ).tolist()
+    store = load_store()
 
-    results = collection.query(
-        query_embeddings=question_embedding,
-        n_results=limit,
-        where={
-            "topic_id": topic_id
-        },
-    )
+    topic_chunks = [
+        item
+        for item in store
+        if item.get("topic_id") == topic_id
+    ]
 
-    documents = results.get(
-        "documents",
-        [],
-    )
-
-    if not documents:
+    if not topic_chunks:
         return []
 
-    if not documents[0]:
-        return []
+    question_words = normalize_words(
+        question
+    )
 
-    return documents[0]
+    scored_chunks = []
+
+    for item in topic_chunks:
+        chunk_text = item.get(
+            "text",
+            "",
+        )
+
+        chunk_words = normalize_words(
+            chunk_text
+        )
+
+        common_words = (
+            question_words
+            & chunk_words
+        )
+
+        score = len(common_words)
+
+        scored_chunks.append(
+            (
+                score,
+                chunk_text,
+            )
+        )
+
+    scored_chunks.sort(
+        key=lambda item: item[0],
+        reverse=True,
+    )
+
+    results = [
+        text
+        for score, text in scored_chunks
+        if score > 0
+    ]
+
+    if not results:
+        results = [
+            item.get("text", "")
+            for item in topic_chunks[:limit]
+        ]
+
+    return results[:limit]
 
 
 def delete_file_chunks(
     file_id: int,
 ):
-    collection.delete(
-        where={
-            "file_id": file_id
-        }
-    )
+    store = load_store()
+
+    store = [
+        item
+        for item in store
+        if item.get("file_id") != file_id
+    ]
+
+    save_store(store)
 
 
 def build_grounded_prompt(
