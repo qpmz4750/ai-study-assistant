@@ -9,3 +9,4 @@ uvicorn[standard]
 
 chromadb
 sentence-transformers
+chromadb
