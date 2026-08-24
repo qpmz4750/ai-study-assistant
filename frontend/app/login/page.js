@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 export default function LoginPage() {
   const router = useRouter();
 
@@ -18,8 +21,8 @@ export default function LoginPage() {
     setError("");
 
     try {
-     const response = await fetch(
-  `${API_URL}/auth/login`,
+      const response = await fetch(
+        `${API_URL}/auth/login`,
         {
           method: "POST",
           headers: {
@@ -33,7 +36,9 @@ export default function LoginPage() {
       );
 
       if (!response.ok) {
-        throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+        throw new Error(
+          "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+        );
       }
 
       const data = await response.json();
