@@ -9,45 +9,33 @@ from app.core.database import initialize_database
 
 def create_app() -> FastAPI:
     """Build and configure the API application."""
+
     initialize_database()
+
     application = FastAPI(
         title="AI Study Assistant API",
         version="1.0.0",
         description="API for study topics, notes, files, quizzes, and AI help.",
     )
+
     application.add_middleware(
         CORSMiddleware,
         allow_origins=[
             "http://localhost:3000",
             "http://127.0.0.1:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:3001",
             "http://172.20.10.2:3000",
+            "https://ai-study-assistant-2-764y.onrender.com",
         ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    application.include_router(router)
-    return application
 
-
-app = create_app()
     application.include_router(router)
 
     return application
 
 
 app = create_app()
-application.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-        "http://172.20.10.2:3000",
-        "https://ai-study-assistant-2-764y.onrender.com",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
