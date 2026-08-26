@@ -9,7 +9,6 @@ from app.core.database import initialize_database
 
 def create_app() -> FastAPI:
     """Build and configure the API application."""
-
     initialize_database()
 
     application = FastAPI(
@@ -23,8 +22,6 @@ def create_app() -> FastAPI:
         allow_origins=[
             "http://localhost:3000",
             "http://127.0.0.1:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:3001",
             "http://172.20.10.2:3000",
             "https://ai-study-assistant-2-764y.onrender.com",
         ],
@@ -36,3 +33,6 @@ def create_app() -> FastAPI:
     application.include_router(router)
 
     return application
+
+
+app = create_app()
