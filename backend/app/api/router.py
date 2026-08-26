@@ -822,7 +822,7 @@ def summarize_topic(
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
+            model="gemini-3.1-flash-lite",
             contents=prompt,
         )
         summary = response.text
@@ -886,7 +886,7 @@ def explain_topic(
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
+            model="gemini-3.1-flash-lite",
             contents=prompt,
         )
         explanation = response.text
@@ -1022,7 +1022,7 @@ def generate_quiz(
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
+            model="gemini-3.1-flash-lite",
             contents=prompt,
         )
         quiz_text = response.text
@@ -1172,7 +1172,7 @@ def chat(
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model="gemini-3.5-flash-lite",
+            model="gemini-3.1-flash-lite",
             contents=prompt,
         )
         answer = response.text
