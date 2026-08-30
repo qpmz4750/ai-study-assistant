@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:8000";
+
 export default function DashboardPage() {
   const router = useRouter();
 
@@ -106,11 +108,9 @@ export default function DashboardPage() {
       `${API_URL}/topics/${topicId}/files`,
       {
         method: "POST",
-
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
-
         body: formData,
       }
     );
@@ -193,7 +193,9 @@ export default function DashboardPage() {
       setSelectedFile(null);
 
       const fileInput =
-        document.getElementById("topic-file-input");
+        document.getElementById(
+          "topic-file-input"
+        );
 
       if (fileInput) {
         fileInput.value = "";
@@ -206,6 +208,7 @@ export default function DashboardPage() {
       );
 
       await fetchTopics();
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -214,9 +217,8 @@ export default function DashboardPage() {
   }
 
   async function deleteTopic(topicId) {
-    const confirmed = window.confirm(
-      "هل تريد حذف الموضوع؟"
-    );
+    const confirmed =
+      window.confirm("هل تريد حذف الموضوع؟");
 
     if (!confirmed) return;
 
@@ -235,11 +237,17 @@ export default function DashboardPage() {
         }
       );
 
+      if (response.status === 401) {
+        logout();
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("فشل حذف الموضوع");
       }
 
       await fetchTopics();
+
     } catch (err) {
       setError(err.message);
     }
@@ -247,10 +255,17 @@ export default function DashboardPage() {
 
   return (
     <div className="app-shell">
-      <main className="main-content" dir="rtl">
+
+      <main
+        className="main-content"
+        dir="rtl"
+      >
+
         <header className="page-header">
           <div>
-            <h1>لوحة التحكم</h1>
+            <h1>
+              لوحة التحكم
+            </h1>
 
             <p className="muted">
               نظّم مواضيعك وابدأ رحلة تعلمك.
@@ -275,10 +290,15 @@ export default function DashboardPage() {
         )}
 
         <section className="card topic-form">
-          <h2>+ موضوع جديد</h2>
+
+          <h2>
+            + موضوع جديد
+          </h2>
 
           <form onSubmit={handleCreateTopic}>
+
             <div className="form-row">
+
               <input
                 className="form-input"
                 placeholder="اسم الموضوع"
@@ -310,6 +330,7 @@ export default function DashboardPage() {
               </label>
 
               <button
+                type="submit"
                 className="primary-btn"
                 disabled={creating}
               >
@@ -317,10 +338,12 @@ export default function DashboardPage() {
                   ? "جاري الإضافة..."
                   : "إضافة"}
               </button>
+
             </div>
 
             {selectedFile && (
               <div className="selected-file">
+
                 <span>
                   📄 {selectedFile.name}
                 </span>
@@ -343,36 +366,50 @@ export default function DashboardPage() {
                 >
                   ✕
                 </button>
+
               </div>
             )}
 
             <p className="file-help">
               اختياري — PDF أو TXT بحد أقصى 10 MB
             </p>
+
           </form>
+
         </section>
 
         <section>
+
           <h2 className="section-title">
             مواضيعي
           </h2>
 
           {loading ? (
+
             <p className="muted">
               جاري تحميل المواضيع...
             </p>
+
           ) : topics.length === 0 ? (
+
             <div className="card empty-card">
               لا توجد مواضيع حتى الآن
             </div>
+
           ) : (
+
             <div className="topics-grid">
+
               {topics.map((topic) => (
+
                 <article
                   className="topic-card"
                   key={topic.id}
                 >
-                  <h3>{topic.title}</h3>
+
+                  <h3>
+                    {topic.title}
+                  </h3>
 
                   <p>
                     {topic.description ||
@@ -380,6 +417,7 @@ export default function DashboardPage() {
                   </p>
 
                   <div className="topic-card-actions">
+
                     <button
                       className="primary-btn"
                       onClick={() =>
@@ -399,15 +437,26 @@ export default function DashboardPage() {
                     >
                       حذف
                     </button>
+
                   </div>
+
                 </article>
+
               ))}
+
             </div>
+
           )}
+
         </section>
+
       </main>
 
-      <aside className="sidebar" dir="rtl">
+      <aside
+        className="sidebar"
+        dir="rtl"
+      >
+
         <div className="sidebar-brand">
           AI Study ✦
         </div>
@@ -422,17 +471,23 @@ export default function DashboardPage() {
         </button>
 
         <div className="sidebar-section">
+
           <div className="sidebar-title">
             مواضيعي
           </div>
 
           {topics.length === 0 ? (
+
             <div className="sidebar-empty">
               لا توجد مواضيع
             </div>
+
           ) : (
+
             <div className="sidebar-topics">
+
               {topics.map((topic) => (
+
                 <button
                   key={topic.id}
                   className="sidebar-topic"
@@ -442,6 +497,7 @@ export default function DashboardPage() {
                     )
                   }
                 >
+
                   <span className="topic-dot">
                     •
                   </span>
@@ -449,10 +505,15 @@ export default function DashboardPage() {
                   <span className="topic-name">
                     {topic.title}
                   </span>
+
                 </button>
+
               ))}
+
             </div>
+
           )}
+
         </div>
 
         <button
@@ -461,6 +522,7 @@ export default function DashboardPage() {
         >
           تسجيل الخروج
         </button>
+
       </aside>
 
       <style jsx>{`
@@ -470,77 +532,53 @@ export default function DashboardPage() {
 
         .app-shell {
           min-height: 100vh;
-
           display: grid;
-
           grid-template-columns:
             minmax(0, 1fr)
             300px;
-
           direction: ltr;
-
           background: #070c14;
           color: #f5f7ff;
-
           font-family: Arial, sans-serif;
         }
 
         .main-content {
           grid-column: 1;
           grid-row: 1;
-
           min-width: 0;
-
           width: 100%;
           max-width: 1500px;
-
           margin: 0 auto;
-
           padding: 42px 38px 70px;
         }
 
         .sidebar {
           grid-column: 2;
           grid-row: 1;
-
           min-height: 100vh;
-
           background: #090f19;
-
           border-left: 1px solid #1e293b;
-
           padding: 28px 22px;
-
           display: flex;
           flex-direction: column;
-
           gap: 12px;
         }
 
         .sidebar-brand {
           font-size: 23px;
           font-weight: 800;
-
           margin-bottom: 25px;
         }
 
         .nav-item {
           width: 100%;
-
           border: 0;
-
           border-radius: 14px;
-
           padding: 14px 16px;
-
           background: transparent;
-
           color: #9eabc2;
-
           cursor: pointer;
-
           text-align: right;
-
           font-size: 15px;
         }
 
@@ -555,43 +593,28 @@ export default function DashboardPage() {
 
         .sidebar-title {
           padding: 0 8px;
-
           margin-bottom: 9px;
-
           color: #6f7d95;
-
           font-size: 13px;
         }
 
         .sidebar-topics {
           display: flex;
-
           flex-direction: column;
-
           gap: 6px;
         }
 
         .sidebar-topic {
           width: 100%;
-
           border: 0;
-
           border-radius: 11px;
-
           padding: 11px 12px;
-
           display: flex;
-
           align-items: center;
-
           gap: 8px;
-
           background: transparent;
-
           color: #b8c3d7;
-
           cursor: pointer;
-
           text-align: right;
         }
 
@@ -602,47 +625,36 @@ export default function DashboardPage() {
 
         .topic-dot {
           color: #5875ff;
-
           font-size: 20px;
-
           line-height: 1;
         }
 
         .topic-name {
           overflow: hidden;
-
           white-space: nowrap;
-
           text-overflow: ellipsis;
         }
 
         .sidebar-empty {
           padding: 10px;
-
           color: #59677e;
-
           font-size: 13px;
         }
 
         .logout {
           margin-top: auto;
-
           color: #ff7474;
         }
 
         .page-header {
           display: flex;
-
           justify-content: space-between;
-
           align-items: flex-start;
-
           margin-bottom: 38px;
         }
 
         .page-header h1 {
           margin: 0 0 10px;
-
           font-size: 38px;
         }
 
@@ -652,119 +664,82 @@ export default function DashboardPage() {
 
         .card {
           background: #111927;
-
           border: 1px solid #28354a;
-
           border-radius: 22px;
         }
 
         .topic-form {
           padding: 28px;
-
           margin-bottom: 38px;
         }
 
         .topic-form h2 {
           margin: 0 0 22px;
-
           font-size: 25px;
         }
 
         .form-row {
           display: grid;
-
           grid-template-columns:
             1fr
             1fr
             170px
             110px;
-
           gap: 14px;
         }
 
         .form-input {
           height: 62px;
-
           border: 1px solid #334155;
-
           border-radius: 15px;
-
           background: #0b111c;
-
           color: white;
-
           padding: 0 18px;
-
           outline: none;
         }
 
         .file-btn {
           height: 62px;
-
           border: 1px solid #334155;
-
           border-radius: 15px;
-
           background: #0b111c;
-
           color: #d9e4ff;
-
           display: flex;
-
           align-items: center;
-
           justify-content: center;
-
           cursor: pointer;
-
           white-space: nowrap;
         }
 
         .primary-btn {
           min-height: 52px;
-
           border: 0;
-
           border-radius: 13px;
-
           background: #4c6fff;
-
           color: white;
-
           padding: 0 18px;
-
           cursor: pointer;
         }
 
         .selected-file {
           margin-top: 14px;
-
           padding: 12px 14px;
-
           border: 1px solid #263247;
-
           border-radius: 12px;
-
           background: #0b111c;
-
           display: flex;
-
           justify-content: space-between;
         }
 
         .remove-file-btn {
           border: 0;
-
           background: transparent;
-
           color: #ff7474;
-
           cursor: pointer;
         }
 
         .file-help {
           color: #75839b;
-
           font-size: 12px;
         }
 
@@ -774,23 +749,18 @@ export default function DashboardPage() {
 
         .topics-grid {
           display: grid;
-
           grid-template-columns:
             repeat(
               auto-fill,
               minmax(270px, 1fr)
             );
-
           gap: 16px;
         }
 
         .topic-card {
           padding: 22px;
-
           border: 1px solid #27344a;
-
           border-radius: 18px;
-
           background: #101826;
         }
 
@@ -800,58 +770,44 @@ export default function DashboardPage() {
 
         .topic-card p {
           color: #8996ad;
-
           min-height: 40px;
         }
 
         .topic-card-actions {
           margin-top: 18px;
-
           display: flex;
-
           gap: 10px;
         }
 
         .danger-btn {
           min-height: 52px;
-
           border: 1px solid #733b42;
-
           border-radius: 13px;
-
           background: #241318;
-
           color: #ff8686;
-
           padding: 0 16px;
-
           cursor: pointer;
         }
 
         .error-box,
         .success-box {
           margin-bottom: 18px;
-
           padding: 14px 17px;
-
           border-radius: 12px;
         }
 
         .error-box {
           border: 1px solid #813737;
-
           color: #ff9b9b;
         }
 
         .success-box {
           border: 1px solid #277b57;
-
           color: #65dda5;
         }
 
         .empty-card {
           padding: 20px;
-
           color: #7f8ca4;
         }
 
@@ -863,19 +819,14 @@ export default function DashboardPage() {
 
           .sidebar {
             order: 1;
-
             width: 100%;
-
             min-height: auto;
-
             border-left: 0;
-
             border-bottom: 1px solid #1e293b;
           }
 
           .main-content {
             order: 2;
-
             padding: 24px 16px 50px;
           }
 
@@ -888,6 +839,7 @@ export default function DashboardPage() {
           }
         }
       `}</style>
+
     </div>
   );
 }

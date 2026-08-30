@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://127.0.0.1:8000";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,13 +37,14 @@ export default function LoginPage() {
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
         throw new Error(
-          "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+          data.detail ||
+            "البريد الإلكتروني أو كلمة المرور غير صحيحة"
         );
       }
-
-      const data = await response.json();
 
       localStorage.setItem(
         "access_token",
@@ -49,8 +52,13 @@ export default function LoginPage() {
       );
 
       router.push("/dashboard");
+
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+
+      setError(
+        err.message || "حدث خطأ أثناء تسجيل الدخول"
+      );
     } finally {
       setLoading(false);
     }
@@ -61,14 +69,19 @@ export default function LoginPage() {
       <div className="auth-layout">
 
         <section className="auth-info">
+
           <div className="brand">
-            <span className="brand-icon">✦</span>
+            <span className="brand-icon">
+              ✦
+            </span>
+
             AI Study Assistant
           </div>
 
           <h1>
             تعلم بشكل
             <br />
+
             <span className="gradient-text">
               أذكى
             </span>
@@ -82,33 +95,48 @@ export default function LoginPage() {
           </p>
 
           <div className="feature-list">
+
             <div className="feature-box">
-              <strong>✦ مساعد ذكي</strong>
+              <strong>
+                ✦ مساعد ذكي
+              </strong>
+
               <p>
                 اسأل عن موضوعك واحصل على إجابة.
               </p>
             </div>
 
             <div className="feature-box">
-              <strong>✓ اختبارات تفاعلية</strong>
+              <strong>
+                ✓ اختبارات تفاعلية
+              </strong>
+
               <p>
                 اختبر معرفتك واعرف درجتك.
               </p>
             </div>
 
             <div className="feature-box">
-              <strong>≡ تنظيم الملاحظات</strong>
+              <strong>
+                ≡ تنظيم الملاحظات
+              </strong>
+
               <p>
                 مواضيعك وملاحظاتك في مكان واحد.
               </p>
             </div>
+
           </div>
+
         </section>
 
         <section className="auth-form-side">
+
           <div className="auth-card">
 
-            <h2>مرحبًا بعودتك</h2>
+            <h2>
+              مرحبًا بعودتك
+            </h2>
 
             <p className="subtitle">
               سجل الدخول لمتابعة تعلمك
@@ -117,6 +145,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit}>
 
               <div className="form-group">
+
                 <label>
                   البريد الإلكتروني
                 </label>
@@ -131,9 +160,11 @@ export default function LoginPage() {
                   }
                   required
                 />
+
               </div>
 
               <div className="form-group">
+
                 <label>
                   كلمة المرور
                 </label>
@@ -148,6 +179,7 @@ export default function LoginPage() {
                   }
                   required
                 />
+
               </div>
 
               {error && (
@@ -157,6 +189,7 @@ export default function LoginPage() {
               )}
 
               <button
+                type="submit"
                 className="primary-btn full-btn"
                 disabled={loading}
               >
@@ -164,21 +197,24 @@ export default function LoginPage() {
                   ? "جاري تسجيل الدخول..."
                   : "تسجيل الدخول"}
               </button>
+
             </form>
 
             <div className="auth-switch">
+
               ما عندك حساب؟{" "}
 
-              <button
+              <Link
+                href="/register"
                 className="link-button"
-                onClick={() =>
-                  router.push("/register")
-                }
               >
                 إنشاء حساب
-              </button>
+              </Link>
+
             </div>
+
           </div>
+
         </section>
 
       </div>

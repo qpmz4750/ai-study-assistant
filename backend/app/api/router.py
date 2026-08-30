@@ -1178,11 +1178,12 @@ def chat(
         answer = response.text
         if not answer:
             raise ValueError("Gemini returned an empty response")
-    except Exception:
+    except Exception as e:
         logger.exception("Gemini request failed")
+        print("GEMINI ERROR:", repr(e))
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="The AI service could not answer the request.",
+            detail=f"Gemini error: {str(e)}",
         )
 
     return {
