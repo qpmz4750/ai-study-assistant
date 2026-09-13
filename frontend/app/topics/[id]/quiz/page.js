@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function QuizPage() {
   const params = useParams();

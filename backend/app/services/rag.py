@@ -2,19 +2,11 @@ import os
 
 import chromadb
 
+from app.core.config import settings
 
-BASE_DIR = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(__file__)
-    )
-)
 
-CHROMA_PATH = os.path.join(
-    BASE_DIR,
-    "chroma_db",
-)
-
-client = chromadb.PersistentClient(path=CHROMA_PATH)
+settings.chroma_dir.mkdir(parents=True, exist_ok=True)
+client = chromadb.PersistentClient(path=str(settings.chroma_dir))
 collection = client.get_or_create_collection(name="topic_files")
 
 

@@ -1,0 +1,19 @@
+[Unit]
+Description=AI Study Assistant FastAPI service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=studyassistant
+Group=studyassistant
+WorkingDirectory=/opt/ai-study-assistant/backend
+EnvironmentFile=/etc/ai-study-assistant/api.env
+ExecStart=/opt/ai-study-assistant/backend/.venv/bin/python -m app.server
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

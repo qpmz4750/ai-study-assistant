@@ -4,9 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -135,7 +133,7 @@ export default function LoginPage() {
           <div className="auth-card">
 
             <h2>
-              مرحبًا بعودتك
+             ارحبببب
             </h2>
 
             <p className="subtitle">
@@ -194,7 +192,7 @@ export default function LoginPage() {
                 disabled={loading}
               >
                 {loading
-                  ? "جاري تسجيل الدخول..."
+                  ?"....انتظر ديقيه"
                   : "تسجيل الدخول"}
               </button>
 
@@ -208,7 +206,7 @@ export default function LoginPage() {
                 href="/register"
                 className="link-button"
               >
-                إنشاء حساب
+                تبي تسوي حساب
               </Link>
 
             </div>

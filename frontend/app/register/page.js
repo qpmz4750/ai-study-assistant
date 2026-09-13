@@ -4,9 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://127.0.0.1:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -132,7 +130,7 @@ export default function RegisterPage() {
             <div className="feature-box">
               <strong>✓ اختبارات</strong>
               <p>
-                اختبارات مولدة من ملاحظاتك.
+                اختبارات جديدة من ملاحظاتك.
               </p>
             </div>
 

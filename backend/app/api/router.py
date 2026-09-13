@@ -17,6 +17,7 @@ from google import genai
 from pypdf import PdfReader
 
 from app.core.database import get_db_connection
+from app.core.config import settings
 from app.core.security import (
     create_access_token,
     get_current_user_id,
@@ -671,32 +672,44 @@ async def upload_topic_file(
                 detail="Topic not found.",
             )
 
-        cursor = connection.execute(
-            """
-            INSERT INTO topic_files (
-                topic_id,
-                filename,
-                content_type,
-                extracted_text
-            )
-            VALUES (?, ?, ?, ?)
-            """,
-            (
-                topic_id,
-                filename,
-                file.content_type,
-                extracted_text,
-            ),
-        )
+    settings.upload_dir.mkdir(parents=True, exist_ok=True)
+    stored_filename = f"{topic_id}_{secrets.token_urlsafe(16)}{extension}"
+    storage_path = settings.upload_dir / stored_filename
+    storage_path.write_bytes(file_bytes)
 
-        created = connection.execute(
-            """
-            SELECT id, topic_id, filename, content_type, created_at
-            FROM topic_files
-            WHERE id = ?
-            """,
-            (cursor.lastrowid,),
-        ).fetchone()
+    try:
+        with get_db_connection() as connection:
+            cursor = connection.execute(
+                """
+                INSERT INTO topic_files (
+                    topic_id,
+                    filename,
+                    content_type,
+                    extracted_text,
+                    storage_path
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    topic_id,
+                    filename,
+                    file.content_type,
+                    extracted_text,
+                    str(storage_path),
+                ),
+            )
+
+            created = connection.execute(
+                """
+                SELECT id, topic_id, filename, content_type, created_at
+                FROM topic_files
+                WHERE id = ?
+                """,
+                (cursor.lastrowid,),
+            ).fetchone()
+    except Exception:
+        storage_path.unlink(missing_ok=True)
+        raise
 
     add_document(
         topic_id=topic_id,
@@ -756,6 +769,15 @@ def delete_topic_file(
     user_id: int = Depends(get_current_user_id),
 ):
     with get_db_connection() as connection:
+        stored_file = connection.execute(
+            """
+            SELECT storage_path FROM topic_files
+            WHERE id = ? AND topic_id IN (
+                SELECT id FROM topics WHERE user_id = ?
+            )
+            """,
+            (file_id, user_id),
+        ).fetchone()
         cursor = connection.execute(
             """
             DELETE FROM topic_files
@@ -774,6 +796,11 @@ def delete_topic_file(
             )
 
     delete_file_chunks(file_id)
+    if stored_file and stored_file["storage_path"]:
+        try:
+            os.remove(stored_file["storage_path"])
+        except FileNotFoundError:
+            pass
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

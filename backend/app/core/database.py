@@ -6,6 +6,7 @@ from app.core.config import settings
 
 
 def get_db_connection() -> sqlite3.Connection:
+    settings.db_path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(settings.db_path)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
@@ -44,9 +45,15 @@ def initialize_database() -> None:
                 filename TEXT NOT NULL,
                 content_type TEXT,
                 extracted_text TEXT NOT NULL,
+                storage_path TEXT,
                 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (topic_id) REFERENCES topics (id) ON DELETE CASCADE
             );
             """
         )
-
+        columns = {
+            row["name"]
+            for row in connection.execute("PRAGMA table_info(topic_files)")
+        }
+        if "storage_path" not in columns:
+            connection.execute("ALTER TABLE topic_files ADD COLUMN storage_path TEXT")

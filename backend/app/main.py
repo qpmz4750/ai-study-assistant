@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import router
+from app.core.config import settings
 from app.core.database import initialize_database
 
 
@@ -19,12 +20,7 @@ def create_app() -> FastAPI:
 
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://172.20.10.2:3000",
-            "https://ai-study-assistant-2-764y.onrender.com",
-        ],
+        allow_origins=list(settings.cors_allowed_origins),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
